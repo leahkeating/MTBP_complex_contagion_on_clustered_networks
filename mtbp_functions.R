@@ -1,5 +1,5 @@
 ########################################################################
-# Title: mean_matrix_functions.R
+# Title: mtbp_functions.R
 # Purpose: functions that generate different mean matrices for different networks
 # Author: Leah Keating
 # Date last edited: 1 July 2021
