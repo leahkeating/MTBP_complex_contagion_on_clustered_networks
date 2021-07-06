@@ -2,9 +2,10 @@
 # Title: mtbp_functions.R
 # Purpose: functions that generate different mean matrices for different networks
 # Author: Leah Keating
-# Date last edited: 1 July 2021
+# Date last edited: 6 July 2021
 ########################################################################
 library(Matrix)
+library(tidyverse)
 
 ##########################
 # Generate the mean matrix
@@ -72,3 +73,47 @@ mean_mat <- function(alpha, q1, m, n, cl_4 = 0){
   return(mat)
 }
 
+####################################
+# Expected cascade size - analytic
+####################################
+
+# as described in Sec. IV A this function calculates the expected caascade size
+# analytically using the mean matrix
+
+expected_size <- function(alpha, q1, m, n, cl_4 = 0){
+  if (cl_4 == 0){
+    if (m!= 0 & n != 0 ){
+      if(2*m + n != 6){print("This function only works for 6-regular networks.")}
+      M <- mean_mat(alpha = alpha, q1 = q1, m = 1, n = 4)
+      a <- c(0,1,2,1,0,1)
+      z0 <- c(m,0,0,0,n,0) %>% Matrix()
+      x_tilde <- Matrix::solve(diag(nrow(M))-M,Matrix(a))
+      x <- 1 + t(z0)%*%  M%*%x_tilde
+      return(as.numeric(x))
+    }else if(n == 0){
+      if(m!=3){print("This function only works for 6-regular networks.")}
+      M <- mean_mat(q1 = q1, alpha = alpha, m = m, n = n)
+      a <- c(0,1,2,1)
+      z0 <- c(3,0,0,0) %>% Matrix()
+      x_tilde <- Matrix::solve(diag(nrow(M))-M,Matrix(a))
+      x <- 1 + t(z0)%*%  M%*%x_tilde
+      return(as.numeric(x))
+    }else if(m==0){
+      if(n!=6){print("This function only works for 6-regular networks.")}
+      p1 <- 1-q1
+      x_offspring <- 1/(1-5*p1)
+      x_seed <- 1+6*p1*x_offspring
+      return(x_seed)
+    }
+  }else if(cl_4 == 2){
+    if((m == 0 & n == 0)==FALSE){print("This function only works for 6-regular networks.")}
+    M <- mean_mat(q1 = q1, alpha = alpha, m = 0, n = 0, cl_4 = cl_4)
+    a <- c(0,1,2,3,1,2,1)
+    z0 <- c(2,0,0,0,0,0,0) %>% Matrix()
+    x_tilde <- Matrix::solve(diag(nrow(M))-M,Matrix(a))
+    x <- 1 + t(z0)%*%  M%*%x_tilde
+    return(as.numeric(x))
+  }else{
+    print("invalid input")
+  }
+}
