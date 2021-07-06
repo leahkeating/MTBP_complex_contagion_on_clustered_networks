@@ -9,3 +9,5 @@ Clustered Networks
     file contains all of the functions required for the other files. The
     functions include:
       - A function to create the mean matrix (mean\_mat( ))
+      - A function that calculates the expected cascade size
+        analytically (expected\_size())
