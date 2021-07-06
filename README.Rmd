@@ -11,4 +11,4 @@ knitr::opts_chunk$set(echo = FALSE)
 
 1. The [mtbp_functions.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/mtbp_functions.R) file contains all of the functions required for the other files. The functions include:
     + A function to create the mean matrix (mean_mat( ))
-    
+    + A function that calculates the expected cascade size analytically (expected_size())
