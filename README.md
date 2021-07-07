@@ -17,4 +17,4 @@ Clustered Networks
     boundaries for the 4 networks, similarly to Fig. 3 in the
 paper.
 
-<img src="20210624_newman_crit.png" width="35%" style="display: block; margin: auto;" />
+<img src="20210624_newman_crit.png" width="45%" /><img src="20210624_clique_crit.png" width="45%" />
