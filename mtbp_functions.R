@@ -6,6 +6,7 @@
 ########################################################################
 library(Matrix)
 library(tidyverse)
+library(igraph)
 
 ##########################
 # Generate the mean matrix
@@ -116,4 +117,282 @@ expected_size <- function(alpha, q1, m, n, cl_4 = 0){
   }else{
     print("invalid input")
   }
+}
+
+#######################################################
+# Branching process simulation code
+#######################################################
+# Multi-type BP simulations for triangle type network
+#######################################################
+
+# simulate result matrix
+m_triangle_bp_sim <- function(q1 = 0.85, alpha = 0, m = 2){
+  # function to test the CC BP for cliques
+  # matrix: population of each z1, z2 ,z3 ,z4
+  # q1: prob of a node note adopting 
+  # alpha: social reinf
+  br_res=matrix(NA, nrow = 10000, 4)
+  colnames(br_res) <- c('x1','x2','x3','x4')
+  matrix = br_res
+  matrix[1,] <- c(m,0,0,0)
+  for(i in 2:nrow(matrix)){ 
+    # im using a for loop because I've preallocated the size of the matrix
+    # should be a little but more time efficients
+    z_curr <- matrix[i-1,] # the previous steps population
+    z_new <- c(0,0,0,0) # vector for offspring
+    
+    z1_res <- rbinom(n = z_curr[1], size = 2, 1 - q1) # number off spring from z1
+    z2_res <- rbinom(n = z_curr[2], size = 1, 1 - (q1 * (1 - alpha))) # number of off spring from z2
+    
+    # state of the z_vec in the next timestep
+    z_new[1] <- z_new[1] + (m-1)*sum(z1_res == 1) + (2 *(m-1)*sum(z1_res == 2)) + (m-1)*sum(z2_res == 1)
+    z_new[2] <- z_new[2] + sum(z1_res == 1)
+    z_new[3] <- z_new[3] + sum(z1_res == 2)
+    z_new[4] <- z_new[4] + sum(z2_res == 1)
+    
+    matrix[i,] <- z_new # save to current z_new to maxtrix
+    
+    # stop if we do not have any new offspring
+    if(z_new[1] == 0 & z_new[2] == 0) break
+  }
+  
+  # change to tibble and remove rows that we do not use
+  matrix <- matrix %>% as_tibble() %>% filter(complete.cases(.))
+  
+  return(matrix)
+}
+# function for finding its size
+m_triangle_size <- function(res) {
+  totals <- colSums(res)
+  return(sum(1,totals[2],2*totals[3],totals[4]))
+}
+# simulate many times with the result being a vector of the sizes
+m_triangle_sim_sizes <- function(q1, alpha, m, total = 100){
+  sizes <- numeric()
+  for (i in 1:total) {
+    sizes <- c(sizes,m_triangle_bp_sim(q1 = q1, alpha = alpha, m = m) %>% m_triangle_size())
+  }
+  return(sizes)
+}
+#m_triangle_sim_sizes(q1 = 0.9, alpha = 0.3, m = 3)
+
+#######################################################
+# Multi-type BP simulations for tree type network
+#######################################################
+
+l_edges_bp_sim <- function(q1 = 0.85, l = 6){
+  br_res=matrix(NA, nrow = 10000, 2)
+  colnames(br_res) <- c('x1','x2')
+  matrix = br_res
+  matrix[1,] <- c(l,0)
+  for(i in 2:nrow(matrix)){ 
+    # im using a for loop because I've preallocated the size of the matrix
+    # should be a little but more time efficients
+    z_curr <- matrix[i-1,] # the previous steps population
+    z_new <- c(0,0) # vector for offspring
+    
+    z1_res <- rbinom(n = z_curr[1], size = 1, 1 - q1) # number off spring from z1
+    
+    # state of the z_vec in the next timestep
+    z_new[1] <- z_new[1] + (l-1)*sum(z1_res == 1)
+    z_new[2] <- z_new[2] + sum(z1_res == 1)
+    
+    matrix[i,] <- z_new # save to current z_new to maxtrix
+    
+    # stop if we do not have any new offspring
+    if(z_new[1] == 0) break
+  }
+  
+  # change to tibble and remove rows that we do not use
+  matrix <- matrix %>% as_tibble() %>% filter(complete.cases(.))
+  
+  return(matrix)
+}
+l_edges_size <- function(res){
+  totals <- colSums(res)
+  return(sum(1,sum(totals[2])))
+}
+l_edges_sim_sizes <- function(q1, l, total = 100){
+  sizes <- numeric()
+  for (i in 1:total) {
+    sizes <- c(sizes,l_edges_bp_sim(q1 = q1, l = l) %>% l_edges_size())
+  }
+  return(sizes)
+}
+#l_edges_sim_sizes(q1 = 0.9, l = 6)
+
+###########################################################
+# Multi-type BP simulations for m triangles l single edges
+###########################################################
+
+newman_bp_sim <- function(q1 = 0.85, alpha = 0, m = 1, l = 4){# m 3-cliques, l 2-cliques
+  # function to test the CC BP for cliques
+  # matrix: population of each z1, z2 ,z3 ,z4
+  # q1: prob of a node note adopting 
+  # alpha: social reinf
+  br_res=matrix(NA, nrow = 10000, 6)
+  colnames(br_res) <- c('x1','x2','x3','x4','x5','x6')
+  matrix = br_res
+  matrix[1,] <- c(m,0,0,0,l,0)
+  for(i in 2:nrow(matrix)){ 
+    # im using a for loop because I've preallocated the size of the matrix
+    # should be a little but more time efficients
+    z_curr <- matrix[i-1,] # the previous steps population
+    z_new <- c(0,0,0,0,0,0) # vector for offspring
+    
+    z1_res <- rbinom(n = z_curr[1], size = 2, 1 - q1) # number off spring from z1
+    z2_res <- rbinom(n = z_curr[2], size = 1, 1 - (q1 * (1 - alpha))) # number of off spring from z2
+    z5_res <- rbinom(n = z_curr[5], size = 1, 1 - q1) # number of off spring from z5
+    
+    # state of the z_vec in the next timestep
+    z_new[1] <- z_new[1] + (m-1)*sum(z1_res == 1) + (2 *(m-1)*sum(z1_res == 2)) + (m-1)*sum(z2_res == 1) + m*sum(z5_res == 1)
+    z_new[2] <- z_new[2] + sum(z1_res == 1)
+    z_new[3] <- z_new[3] + sum(z1_res == 2)
+    z_new[4] <- z_new[4] + sum(z2_res == 1)
+    z_new[5] <- z_new[5] + l*sum(z1_res == 1) + 2*l*sum(z1_res == 2) + l*sum(z2_res == 1) + (l-1)*sum(z5_res == 1)
+    z_new[6] <- z_new[6] + sum(z5_res == 1)
+    
+    matrix[i,] <- z_new # save to current z_new to maxtrix
+    
+    # stop if we do not have any new offspring
+    if(z_new[1] == 0 & z_new[2] == 0 & z_new[5] == 0) break
+  }
+  # change to tibble and remove rows that we do not use
+  matrix <- matrix %>% as_tibble() %>% filter(complete.cases(.))
+  return(matrix)
+}
+newman_size <- function(matrix){
+  total_arr <- colSums(matrix)
+  return(sum(1,total_arr[2],2*total_arr[3],total_arr[4],total_arr[6]))
+}
+newman_sim_sizes <- function(q1, alpha, m, l, total = 100){
+  sizes <- numeric()
+  for (i in 1:total) {
+    sizes <- c(sizes,newman_bp_sim(q1 = q1, alpha = alpha, m = m, l = l) %>% newman_size())
+  }
+  return(sizes)
+}
+#newman_sim_sizes(q1 = 0.85, alpha = 0, m = 1, l = 4)
+
+###########################################################
+# Multi-type BP simulations for m 4-cliques
+###########################################################
+
+four_cl_bp_sim <- function(q1 = 0.85, alpha = 0, m = 2){
+  # function to test the CC BP for cliques
+  # matrix: population of each z1, z2 ,z3 ,z4
+  # q1: prob of a node note adopting 
+  # alpha: social reinf
+  br_res_4cl=matrix(NA, nrow = 10000, 7)
+  colnames(br_res_4cl) <- c('x1','x2','x3','x4','x5','x6','x7')
+  matrix <- br_res_4cl
+  matrix[1,] <- c(m,0,0,0,0,0,0)
+  for(i in 2:nrow(matrix)){ 
+    # im using a for loop because I've preallocated the size of the matrix
+    # should be a little but more time efficients
+    z_curr <- matrix[i-1,] # the previous steps population
+    z_new <- c(0,0,0,0,0,0,0) # vector for offspring
+    
+    z1_res <- rbinom(n = z_curr[1], size = 3, 1 - q1) # number off spring from z1
+    z2_res <- rbinom(n = z_curr[2], size = 2, 1 - (q1 * (1 - alpha))) # number of off spring from z2
+    z3_res <- rbinom(n = z_curr[3], size = 1, 1-((q1**2)*((1-alpha)**3)))
+    z5_res <- rbinom(n = z_curr[5], size = 1, 1-(q1*((1-alpha)**2)))
+    
+    # state of the z_vec in the next timestep
+    z_new[1] <- z_new[1] + (m-1)*(sum(z1_res == 1) + (2 *sum(z1_res == 2)) + (3*sum(z1_res == 3)) + sum(z2_res == 1) + 2*sum(z2_res == 2) + sum(z3_res == 1) + sum(z5_res == 1))
+    z_new[2] <- z_new[2] + sum(z1_res == 1)
+    z_new[3] <- z_new[3] + sum(z1_res == 2)
+    z_new[4] <- z_new[4] + sum(z1_res == 3)
+    z_new[5] <- z_new[5] + sum(z2_res == 1)
+    z_new[6] <- z_new[6] + sum(z2_res == 2)
+    z_new[7] <- z_new[7] + sum(z3_res == 1) + sum(z5_res == 1)
+    
+    matrix[i,] <- z_new # save to current z_new to maxtrix
+    
+    # stop if we do not have any new offspring
+    if(z_new[1] == 0 & z_new[2] == 0 & z_new[3] == 0 & z_new[5] == 0) break
+  }
+  
+  # change to tibble and remove rows that we do not use
+  matrix <- matrix %>% as_tibble() %>% filter(complete.cases(.))
+  
+  return(matrix)
+}
+four_cl_size <- function(matrix){
+  total_arr <- colSums(matrix)
+  return(sum(1,total_arr[2],2*total_arr[3],3*total_arr[4],total_arr[5], 2*total_arr[6], total_arr[7]))
+} 
+four_cl_sim_sizes <- function(q1, alpha, m, total = 100){
+  sizes <- numeric()
+  for (i in 1:total) {
+    sizes <- c(sizes,four_cl_bp_sim(q1 = q1, alpha = alpha, m = m) %>% four_cl_size())
+  }
+  return(sizes)
+}
+#four_cl_sim_sizes(q1 = 0.85, alpha = 0, m = 2)
+
+############################################################
+# Functions for the network-based simulations
+############################################################
+
+projection_from_bipartite_df <- function(vertex_clique.df, nodes){
+  bipartite.net <- graph_from_data_frame(vertex_clique.df, directed = FALSE)
+  V(bipartite.net)$type <- V(bipartite.net)$name %in% nodes
+  return(bipartite.projection(bipartite.net)$proj2)
+}
+
+# complex contagion model
+p_cc_threshold <- function(q1 = 0.998, alpha, n, m){
+  vals <- numeric(length(n))
+  vals[which(n<m)] <- 1-q1*(1-alpha[which(n<m)])**(n[which(n<m)]-1)
+  vals[which(n>=m)] <- 1-q1*(1-alpha[which(n>=m)])**(m-1)
+  return(vals)
+}
+
+# function for generating the cascades
+generate_cc_cascades <- function(follower.net = follower.net, follower.adj = follower.adj, q1 = 0.998, alpha = 0.002, total = 1000){#, seed_ = NULL
+  all_cascades.df <- tibble(parent = character(), child = character(), generation = numeric(), ID = numeric(), exposures = numeric())
+  for (j in 1:total) {
+    active <- numeric()
+    inactive <- numeric()
+    removed <- numeric()
+    
+    vertex_names <- vertex_attr(follower.net)$name
+    seed <- sample(vertex_names,1)
+    active <- seed
+    inactive <- vertex_names[! vertex_names %in% seed]
+    
+    exposures <- numeric(gorder(follower.net))
+    names(exposures) <- vertex_names
+    cascade.df <- tibble(parent = character(), child = character(), generation = numeric())
+    generation <- 1
+    while (length(active)>0) {
+      new_active <- character()
+      # shuffle active
+      if(length(active)>1){
+        active <- sample(active)
+      }
+      for (i in active) {
+        followers <- vertex_names[which(follower.adj[,i]==1)]
+        potential_adopters <- followers[followers %in% inactive]
+        exposures[potential_adopters] <- exposures[potential_adopters] + 1
+        if(length(potential_adopters)>0){
+          # fix this, problem is with having n a vector
+          adopters <- potential_adopters[runif(length(potential_adopters)) < p_cc_threshold(q1 = q1, alpha = rep(alpha, length(potential_adopters)), n = exposures[potential_adopters], m = 5)]
+          if(length(adopters)>0){
+            new_active <- c(new_active, adopters)
+            inactive <- inactive[! inactive %in% new_active]
+            cascade.df <- cascade.df %>% add_row(parent = rep(i, length(adopters)), child = adopters, generation = rep(generation, length(adopters)))
+          }
+        }
+      }
+      generation <- generation + 1
+      removed <- c(removed, active)
+      active <- new_active
+    }
+    if(nrow(cascade.df)>0){
+      all_cascades.df <- all_cascades.df %>% add_row(cascade.df %>% mutate(ID = rep(j, nrow(cascade.df)), exposures = exposures[cascade.df$child]))
+    }
+  }
+  return(all_cascades.df)
 }
