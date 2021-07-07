@@ -10,7 +10,8 @@ Clustered Networks
     functions include:
       - A function to create the mean matrix (mean\_mat( ))
       - A function that calculates the expected cascade size
-        analytically (expected\_size())
+        analytically (expected\_size()). THe analytical calculation of
+        the expected cascade size is discussed in Sec. IV A.
 2.  The
     [cascade\_condition.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/cascade_condition.R)
     file contains code to generate the plots showing the critical
@@ -18,3 +19,7 @@ Clustered Networks
       - The code details how to generate the boundary lines shown in the
         plots below:
         <img src="20210624_newman_crit.png" width="45%" /><img src="20210624_clique_crit.png" width="45%" />
+3.  The
+    [MTBP\_simulations.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/MTBP_simulations.R)
+    file contains the code for doing the branching process type
+    simulations.
