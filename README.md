@@ -14,7 +14,7 @@ Clustered Networks
 2.  The
     [cascade\_condition.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/cascade_condition.R)
     file contains code to generate the plots showing the critical
-    boundaries for the 4 networks, similarly to Fig. 3 in the
-paper.
-
-<img src="20210624_newman_crit.png" width="45%" /><img src="20210624_clique_crit.png" width="45%" />
+    boundaries for the 4 networks, similarly to Fig. 3 in the paper.
+      - The code details how to generate the boundary lines shown in the
+        plots below:
+        <img src="20210624_newman_crit.png" width="45%" /><img src="20210624_clique_crit.png" width="45%" />
