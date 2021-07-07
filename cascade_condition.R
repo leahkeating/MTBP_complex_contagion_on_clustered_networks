@@ -2,9 +2,12 @@
 # Title: cascade_condition.R
 # Purpose: code to determine parameters which result in sub- and supercritical cascades
 # Author: Leah Keating
-# Date last edited: 6 July 2021
+# Date last edited: 7 July 2021
 ########################################################################
 library(doParallel)
+library(cowplot)
+theme_set(theme_cowplot())
+library(latex2exp)
 
 # load the functions - we need the mean_mat function in particular
 source("mtbp_functions.R")
@@ -63,5 +66,37 @@ stopImplicitCluster()
 # create a data frame where for each network True indicates that those parameters lead to subcritical
 # diffusion and False means that there is supercritical diffusion
 
-
 criticality.df <- criticality.df %>% mutate(crit_6_2cl, crit_4_2cl_1_3cl, crit_3_3cl, crit_2_4cl)
+
+# next we would like to plot the boundaries between the sub- and supercritical boundaries,
+# we can do this by finding the minimum alpha value for each q1 for which we get subcritical
+# cascades
+
+# add in p1 = 1-q1
+
+criticality.df <- criticality.df %>% mutate(p1 = 1-q1)
+
+# for 6 2-cliques the critical transition occurs at p1 = 0.2
+criticality.df %>% filter(crit_6_2cl == TRUE) %>%
+  group_by(p1) %>% summarise(alpha = max(alpha))
+# this is a straight line at p1 = 0.2 and we can't really capture it 
+# this way so we'll do it another way
+
+critical_boundaries.df <- criticality.df %>% filter(crit_4_2cl_1_3cl == TRUE) %>%
+  group_by(p1) %>% summarise(alpha = max(alpha)) %>%
+  mutate(net = "m = 1, n  = 4") %>%
+  add_row(criticality.df %>% filter(crit_3_3cl == TRUE) %>%
+            group_by(p1) %>% summarise(alpha = max(alpha)) %>%
+            mutate(net = "m = 3, n = 0")) %>%
+  add_row(criticality.df %>% filter(crit_2_4cl == TRUE) %>%
+            group_by(p1) %>% summarise(alpha = max(alpha)) %>%
+            mutate(net = "2 4-cliques"))
+
+# plot this to see what it looks like
+critical_boundaries.df %>%
+  ggplot(aes(x = p1, y = alpha, linetype = net)) +
+  geom_line()
+
+
+
+

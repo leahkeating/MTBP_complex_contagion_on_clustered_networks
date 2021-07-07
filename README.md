@@ -11,3 +11,7 @@ Clustered Networks
       - A function to create the mean matrix (mean\_mat( ))
       - A function that calculates the expected cascade size
         analytically (expected\_size())
+2.  The
+    [cascade\_condition.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/cascade_condition.R)
+    file contains code to generate the plots showing the critical
+    boundaries for the 4 networks, similarly to Fig. 3 in the paper.
