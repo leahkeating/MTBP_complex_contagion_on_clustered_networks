@@ -17,7 +17,7 @@ source("mtbp_functions.R")
 # number of 4-cliques
 
 criticality.df <- expand.grid(alpha = seq(from = 0, to = 1, by = 0.01),
-            q1 = seq(from = 0.7, to = 0.9, by = 0.01)) %>%
+            q1 = seq(from = 0.7, to = 0.9, by = 0.001)) %>%
   as_tibble()
 
 # function to calculate the criticality
@@ -90,13 +90,31 @@ critical_boundaries.df <- criticality.df %>% filter(crit_4_2cl_1_3cl == TRUE) %>
             mutate(net = "m = 3, n = 0")) %>%
   add_row(criticality.df %>% filter(crit_2_4cl == TRUE) %>%
             group_by(p1) %>% summarise(alpha = max(alpha)) %>%
-            mutate(net = "2 4-cliques"))
+            mutate(net = "2 4-cliques")) %>%
+  add_row(criticality.df %>% select(alpha) %>% mutate(p1 = 0.2, net = "m = 0, n = 6"))
+
+# the following code removes the alpha = 1 entries for all except those
+# which are on the critical boundary
+
+critical_boundaries.df <- critical_boundaries.df %>%
+  filter(alpha != 1) %>%
+  add_row(critical_boundaries.df %>% filter(alpha == 1) %>%
+            group_by(alpha, net) %>% summarise(p1 = max(p1)))
 
 # plot this to see what it looks like
+# this gives us a line for each network
+
 critical_boundaries.df %>%
   ggplot(aes(x = p1, y = alpha, linetype = net)) +
-  geom_line()
-
+  geom_line() +
+  xlab(TeX("$p_{1}$")) +
+  ylab(TeX("$\\alpha$")) +
+  theme(legend.position = c(0.12, 0.2), legend.box.background = element_rect(fill='#ffffff'),
+                              legend.margin = margin(6, 6, 6, 6),
+                              legend.text = element_text(size = 11),
+                              legend.title=element_text(size=14),
+                              text=element_text(size=16, family="Times New Roman"),
+                              legend.background = element_blank())
 
 
 
