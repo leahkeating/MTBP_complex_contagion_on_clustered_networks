@@ -10,7 +10,7 @@ Clustered Networks
     functions include:
       - A function to create the mean matrix (mean\_mat( ))
       - A function that calculates the expected cascade size
-        analytically (expected\_size()). THe analytical calculation of
+        analytically (expected\_size()). The analytical calculation of
         the expected cascade size is discussed in Sec. IV A.
 2.  The
     [cascade\_condition.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/cascade_condition.R)
@@ -28,3 +28,7 @@ Clustered Networks
 below.
 
 <img src="20210625_newman_sims.png" width="45%" style="display: block; margin: auto;" />
+
+4.  The expected\_size.R file contains the code for generating Fig. 4(b)
+    in the paper. This compares the analytical expected cascade size to
+    the mean cascade size from simulations, as shown below.
