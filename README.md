@@ -29,6 +29,11 @@ below.
 
 <img src="20210625_newman_sims.png" width="45%" style="display: block; margin: auto;" />
 
-4.  The expected\_size.R file contains the code for generating Fig. 4(b)
-    in the paper. This compares the analytical expected cascade size to
-    the mean cascade size from simulations, as shown below.
+4.  The
+    [expected\_size.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/expected_size.R)
+    file contains the code for generating Fig. 4(b) in the paper. This
+    compares the analytical expected cascade size to the mean cascade
+    size from simulations, as shown
+below.
+
+<img src="20210605_expected_cascade_size.png" width="45%" style="display: block; margin: auto;" />
