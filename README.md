@@ -24,7 +24,7 @@ Clustered Networks
     file contains the code for doing the branching process type
     simulations.
       - This file includes code for generating network-based simulations
-        in order to plot Fig.
-4(a).
+        in order to plot Fig. 4(a), as shown
+below.
 
 <img src="20210625_newman_sims.png" width="45%" style="display: block; margin: auto;" />

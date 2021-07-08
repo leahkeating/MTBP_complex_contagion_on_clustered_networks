@@ -131,4 +131,60 @@ cascade_sim_par <- function(j, net = tree_like_net, adj = tree_like_adj, q1 = 0.
   return(out.df)
 }
 
-cascade_sim_par(j = 1, net = tree_like_net, adj = tree_like_adj, total = 100)
+cluster <- makeCluster(6) # run on 6 cores
+registerDoParallel(cluster)
+
+# simulate the cascades on each network
+# increase the total for more simulations - note that the number of simulations = total*6
+
+tree_sims.df <- foreach(i=1:6, .combine = "rbind", .packages = c("igraph", "dplyr", "stringr")) %dopar%
+  cascade_sim_par(i, net = tree_like_net, adj = tree_like_adj, q1 = 0.9, alpha = 0.2, total = 1667)
+intermediate_sims.df <- foreach(i=1:6, .combine = "rbind", .packages = c("igraph", "dplyr", "stringr")) %dopar%
+  cascade_sim_par(i, net = intermediate_net, adj = intermediate_adj, q1 = 0.9, alpha = 0.2, total = 1667)
+triangle_sims.df <- foreach(i=1:6, .combine = "rbind", .packages = c("igraph", "dplyr", "stringr")) %dopar%
+  cascade_sim_par(i, net = triangle_net, adj = triangle_adj, q1 = 0.9, alpha = 0.2, total = 1667)
+four_cl_sims.df <- foreach(i=1:6, .combine = "rbind", .packages = c("igraph", "dplyr", "stringr")) %dopar%
+  cascade_sim_par(i, net = four_cl_net, adj = four_cl_adj, q1 = 0.9, alpha = 0.2, total = 1667)
+
+stopImplicitCluster()
+
+# we now need the cascade size for each of these simulations
+
+net_sim_sizes.df <- tree_sims.df %>% mutate(net = "m = 0, n = 6") %>%
+  add_row(intermediate_sims.df %>% mutate(net = "m = 1, n = 4")) %>%
+  add_row(triangle_sims.df %>% mutate(net = "m = 3, n = 0")) %>%
+  group_by(net, ID) %>% summarise(size = n_distinct(c(parent, child)))
+
+net_size_dist.df <- net_sim_sizes.df %>% group_by(net, size) %>%
+  summarise(n = n()) %>%
+  group_by(net) %>%
+  mutate(p = n/sum(n)) %>%
+  arrange(size) %>%
+  mutate(cdf = cumsum(p), ccdf = 1-cdf) 
+
+# now that we have distributions for both, add the two dfs together
+# and label by simulation type
+
+sim_dist.df <- bp_dist.df %>% ungroup() %>% mutate(sim = "branching process") %>%
+  add_row(net_size_dist.df %>% ungroup() %>% mutate(sim = "network"))
+
+# plot
+
+require(scales)
+sim_dist.df %>%
+  ggplot(aes(x = size, y = ccdf, colour = net, linetype = sim, shape = sim)) +
+  geom_line() +
+  geom_point() +
+  scale_linetype_manual("simulation type", values = c("solid","dotted")) +
+  scale_shape_manual("simulation type",values = c(16,1)) +
+  scale_color_brewer("network",palette = "Set2") +
+  #scale_color_viridis_d(option = "inferno") +
+  scale_x_log10() +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  annotation_logticks() +
+  theme(legend.text = element_text(size = 10), legend.position = c(0.15,0.35),
+        legend.box.background = element_rect(fill='white'),
+        legend.margin = margin(6, 6, 6, 6),
+        legend.title = element_text(size = 11)) +
+  xlab("cascade size")
