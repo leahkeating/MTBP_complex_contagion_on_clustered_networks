@@ -37,3 +37,11 @@ below.
 below.
 
 <img src="20210605_expected_cascade_size.png" width="45%" style="display: block; margin: auto;" />
+
+5.  The
+    [finite\_size\_limitations.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/finite_size_limitations.R)
+    file contains the code required to generate Fig. 6 in the paper, as
+    shown
+below.
+
+<img src="20210625_finite_size.png" width="45%" style="display: block; margin: auto;" />
