@@ -2,7 +2,7 @@
 # Title: expected_size.R
 # Purpose: to compare the expected size of cascades from simulations and theory
 # Author: Leah Keating
-# Date last edited: 8 July 2021
+# Date last edited: 9 July 2021
 ################################################################################
 
 source("mtbp_functions.R")

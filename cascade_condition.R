@@ -4,10 +4,6 @@
 # Author: Leah Keating
 # Date last edited: 7 July 2021
 ########################################################################
-library(doParallel)
-library(cowplot)
-theme_set(theme_cowplot())
-library(latex2exp)
 
 # load the functions - we need the mean_mat function in particular
 source("mtbp_functions.R")

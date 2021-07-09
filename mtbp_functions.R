@@ -7,6 +7,10 @@
 library(Matrix)
 library(tidyverse)
 library(igraph)
+library(doParallel)
+library(cowplot)
+theme_set(theme_cowplot())
+library(latex2exp)
 
 ##########################
 # Generate the mean matrix
@@ -331,6 +335,30 @@ four_cl_sim_sizes <- function(q1, alpha, m, total = 100){
 }
 #four_cl_sim_sizes(q1 = 0.85, alpha = 0, m = 2)
 
+# simulation function that works for all 4 network types
+
+MTBP_sim <- function(q1, alpha = 0, m, n, cl_4 = 0, total = 100){
+  if(cl_4 == 0){
+    if(m == 0 & n == 6){
+      return(l_edges_sim_sizes(q1 = q1, l = 6, total = total))
+    }else if(m == 3 & n == 0){
+      return(m_triangle_sim_sizes(q1 = q1, alpha = alpha, m = 3, total = total))
+    }else if(2*m + n == 6){
+      return(newman_sim_sizes(q1 = q1, alpha = alpha, m = m, l = n, total = total))
+    }else{
+      print("The degree of the nodes must be 6.")
+    }
+  }else if(cl_4 == 2){
+    if(m ==0 & n == 0){
+      return(four_cl_sim_sizes(q1 = q1, alpha = alpha, m = 2, total = total))
+    }else{
+      print("Please do not mix 4-cliques with other clique sizes.")
+    }
+  }else{
+    print("Invalid input.")
+  }
+}
+
 ############################################################
 # Functions for the network-based simulations
 ############################################################
@@ -339,6 +367,46 @@ projection_from_bipartite_df <- function(vertex_clique.df, nodes){
   bipartite.net <- graph_from_data_frame(vertex_clique.df, directed = FALSE)
   V(bipartite.net)$type <- V(bipartite.net)$name %in% nodes
   return(bipartite.projection(bipartite.net)$proj2)
+}
+
+# function which generates network with l triangles and m links per node
+newman_net <- function(n = 1000, l = 0, m = 6){
+  if(l!=0 & m!=0){
+    while (!((n%%l==0) & (n%%m==0) & (n%%3==0) & (n%%2==0))) {
+      n <- n+1
+    }
+    nodes <- str_c("v_",1:n, sep="")
+    three_cliques <- str_c("three_",1:(l*(n/3)), sep = "") %>% rep(., each = 3) %>% sample()
+    two_cliques <- str_c("two_",1:(m*(n/2)), sep = "") %>% rep(., each = 2) %>% sample()
+    vertex_clique.df <- tibble(vertex = rep(nodes,l+m), clique = c(three_cliques, two_cliques))
+  }else if(l != 0){
+    while (!((n%%l==0) & (n%%3==0))) {
+      n <- n+1
+    }
+    nodes <- str_c("v_",1:n, sep="")
+    three_cliques <- str_c("three_",1:(l*(n/3)), sep = "") %>% rep(., each = 3) %>% sample()
+    vertex_clique.df <- tibble(vertex = rep(nodes,l), clique = three_cliques)
+  }else{
+    while (!((n%%m==0) & (n%%2==0))) {
+      n <- n+1
+    }
+    nodes <- str_c("v_",1:n, sep="")
+    two_cliques <- str_c("two_",1:(m*(n/2)), sep = "") %>% rep(., each = 2) %>% sample()
+    vertex_clique.df <- tibble(vertex = rep(nodes,m), clique = two_cliques)
+  }
+  net <- projection_from_bipartite_df(vertex_clique.df, nodes)
+  return(net)
+}
+# function that generates a network where each node is in m 4-cliques
+four_cl_net_fn <- function(n = 1000, m = 2){
+  while (!((n%%m==0)& (n%%4==0) & (n%%2==0))) {
+    n <- n+1
+  }
+  nodes <- str_c("v_",1:n, sep="")
+  four_cliques <- str_c("four_",1:(m*(n/4)), sep = "") %>% rep(., each = 4) %>% sample()
+  vertex_clique.df <- tibble(vertex = rep(nodes,m), clique = four_cliques)
+  net <- projection_from_bipartite_df(vertex_clique.df, nodes)
+  return(net)
 }
 
 # complex contagion model
@@ -395,4 +463,35 @@ generate_cc_cascades <- function(follower.net = follower.net, follower.adj = fol
     }
   }
   return(all_cascades.df)
+}
+
+# function for simulating the cascades in parallel
+cascade_sim_par <- function(j, net = tree_like_net, adj = tree_like_adj, q1 = 0.9, alpha = 0.15, total = 1000){
+  out.df <- generate_cc_cascades(follower.net = net, follower.adj = adj, q1 = q1, alpha = alpha, total = total)
+  out.df <- out.df %>% mutate(ID = str_c(j,ID,sep = "_"))
+  return(out.df)
+}
+
+# this is the simulation function that is also in MTBP_simulations.R
+
+MTBP_sim <- function(q1, alpha = 0, m, n, cl_4 = 0, total = 100){
+  if(cl_4 == 0){
+    if(m == 0 & n == 6){
+      return(l_edges_sim_sizes(q1 = q1, l = 6, total = total))
+    }else if(m == 3 & n == 0){
+      return(m_triangle_sim_sizes(q1 = q1, alpha = alpha, m = 3, total = total))
+    }else if(2*m + n == 6){
+      return(newman_sim_sizes(q1 = q1, alpha = alpha, m = m, l = n, total = total))
+    }else{
+      print("The degree of the nodes must be 6.")
+    }
+  }else if(cl_4 == 2){
+    if(m ==0 & n == 0){
+      return(four_cl_sim_sizes(q1 = q1, alpha = alpha, m = 2, total = total))
+    }else{
+      print("Please do not mix 4-cliques with other clique sizes.")
+    }
+  }else{
+    print("Invalid input.")
+  }
 }

@@ -2,7 +2,7 @@
 # Title: MTBP_simulations.R
 # Purpose: a simulation scheme for cascades using the MTBP
 # Author: Leah Keating
-# Date last edited: 7 July 2021
+# Date last edited: 8 July 2021
 ########################################################################
 
 source("mtbp_functions.R")
@@ -138,13 +138,13 @@ registerDoParallel(cluster)
 # increase the total for more simulations - note that the number of simulations = total*6
 
 tree_sims.df <- foreach(i=1:6, .combine = "rbind", .packages = c("igraph", "dplyr", "stringr")) %dopar%
-  cascade_sim_par(i, net = tree_like_net, adj = tree_like_adj, q1 = 0.9, alpha = 0.2, total = 1667)
+  cascade_sim_par(i, net = tree_like_net, adj = tree_like_adj, q1 = 0.9, alpha = 0.1, total = 1667)
 intermediate_sims.df <- foreach(i=1:6, .combine = "rbind", .packages = c("igraph", "dplyr", "stringr")) %dopar%
-  cascade_sim_par(i, net = intermediate_net, adj = intermediate_adj, q1 = 0.9, alpha = 0.2, total = 1667)
+  cascade_sim_par(i, net = intermediate_net, adj = intermediate_adj, q1 = 0.9, alpha = 0.1, total = 1667)
 triangle_sims.df <- foreach(i=1:6, .combine = "rbind", .packages = c("igraph", "dplyr", "stringr")) %dopar%
-  cascade_sim_par(i, net = triangle_net, adj = triangle_adj, q1 = 0.9, alpha = 0.2, total = 1667)
+  cascade_sim_par(i, net = triangle_net, adj = triangle_adj, q1 = 0.9, alpha = 0.1, total = 1667)
 four_cl_sims.df <- foreach(i=1:6, .combine = "rbind", .packages = c("igraph", "dplyr", "stringr")) %dopar%
-  cascade_sim_par(i, net = four_cl_net, adj = four_cl_adj, q1 = 0.9, alpha = 0.2, total = 1667)
+  cascade_sim_par(i, net = four_cl_net, adj = four_cl_adj, q1 = 0.9, alpha = 0.1, total = 1667)
 
 stopImplicitCluster()
 
