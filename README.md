@@ -18,7 +18,7 @@ Clustered Networks
     boundaries for the 4 networks, similarly to Fig. 3 in the paper.
       - The code details how to generate the boundary lines shown in the
         plots below:
-        <img src="20211112_newman_crit.pdf" width="45%" style="display: block; margin: auto;" /><img src="20211206_clique_crit.pdf" width="45%" style="display: block; margin: auto;" />
+        <img src="20211112_newman_crit.png" width="45%" style="display: block; margin: auto;" /><img src="20211206_clique_crit.png" width="45%" style="display: block; margin: auto;" />
 3.  The
     [MTBP\_simulations.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/MTBP_simulations.R)
     file contains the code for doing the branching process type
