@@ -15,7 +15,7 @@ Clustered Networks
 2.  The
     [cascade\_condition.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/cascade_condition.R)
     file contains code to generate the plots showing the critical
-    boundaries for the 4 networks, similarly to Fig. 3 in the paper.
+    boundaries for the 4 networks, similarly to Fig. 4 in the paper.
       - The code details how to generate the boundary lines shown in the
         plots below:
         <img src="20211112_newman_crit.png" width="45%" style="display: block; margin: auto;" /><img src="20211206_clique_crit.png" width="45%" style="display: block; margin: auto;" />
@@ -24,14 +24,14 @@ Clustered Networks
     file contains the code for doing the branching process type
     simulations.
       - This file includes code for generating network-based simulations
-        in order to plot Fig. 4(a), as shown
+        in order to plot Fig. 6(a), as shown
 below.
 
 <img src="20210625_newman_sims.png" width="45%" style="display: block; margin: auto;" />
 
 4.  The
     [expected\_size.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/expected_size.R)
-    file contains the code for generating Fig. 4(b) in the paper. This
+    file contains the code for generating Fig. 6(b) in the paper. This
     compares the analytical expected cascade size to the mean cascade
     size from simulations, as shown
 below.
@@ -40,7 +40,7 @@ below.
 
 5.  The
     [finite\_size\_limitations.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/finite_size_limitations.R)
-    file contains the code required to generate Fig. 6 in the paper, as
+    file contains the code required to generate Fig. 8 in the paper, as
     shown
 below.
 
