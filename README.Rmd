@@ -16,8 +16,8 @@ knitr::opts_chunk$set(echo = FALSE)
 2. The [cascade_condition.R](https://github.com/leahkeating/MTBP_complex_contagion_on_clustered_networks/blob/main/cascade_condition.R) file contains code to generate the plots showing the critical boundaries for the 4 networks, similarly to Fig. 3 in the paper.
     + The code details how to generate the boundary lines shown in the plots below.
 ```{r fig3, fig.align = 'center', out.width = "45%"}
-knitr::include_graphics("20210624_newman_crit.png")
-knitr::include_graphics("20210624_clique_crit.png")
+knitr::include_graphics("20211112_newman_crit.png")
+knitr::include_graphics("20211206_clique_crit.png")
 
 ```
 
